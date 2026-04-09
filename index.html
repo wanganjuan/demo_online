@@ -124,12 +124,12 @@
             <Table 
               columns={["系统编号", "系统名称", "科目号", "科目名称", "操作柜员号", "操作时间", "操作"]}
               data={[
-                ["XT0001", "虚拟系统001", "10001|10002|10003", "科目001|科目002|科目003", "99999999999", "2026-04-07 09:01:01", <Button key="1" type="text" onClick={() => alert("状态变更为预准入，请到新增页面查看")}>取消</Button>],
-                ["XT0002", "虚拟系统002", "20001|20004", "科目201|科目204", "99999999999", "2026-04-05 13:01:21", <Button key="2" type="text">取消</Button>],
-                ["XT0003", "虚拟系统003", "30006", "科目306", "99999999999", "2026-04-07 10:24:08", <Button key="3" type="text">取消</Button>],
-                ["XT0004", "虚拟系统004", "40003", "科目403", "99999999999", "2026-04-08 12:46:08", <Button key="4" type="text">取消</Button>],
-                ["XT0005", "虚拟系统005", "50008", "科目508", "99999999999", "2026-04-09 08:30:00", <Button key="5" type="text">取消</Button>],
-                ["99701360002", "内部户对账管理系统", "0001", "测试科目", "20220101111", "2026-04-07 09:01:01", <Button key="6" type="text">取消</Button>],
+                ["V-SYS-001", "虚拟测试系统A", "V-10001|V-10002", "虚拟科目01|虚拟科目02", "USER-001", "2026-04-07 09:01:01", <Button key="1" type="text" onClick={() => alert("状态变更为预准入，请到新增页面查看")}>取消</Button>],
+                ["V-SYS-002", "虚拟测试系统B", "V-20001|V-20004", "虚拟科目21|虚拟科目24", "USER-001", "2026-04-05 13:01:21", <Button key="2" type="text">取消</Button>],
+                ["V-SYS-003", "虚拟测试系统C", "V-30006", "虚拟科目36", "USER-002", "2026-04-07 10:24:08", <Button key="3" type="text">取消</Button>],
+                ["V-SYS-004", "虚拟测试系统D", "V-40003", "虚拟科目43", "USER-002", "2026-04-08 12:46:08", <Button key="4" type="text">取消</Button>],
+                ["V-SYS-005", "虚拟测试系统E", "V-50008", "虚拟科目58", "USER-003", "2026-04-09 08:30:00", <Button key="5" type="text">取消</Button>],
+                ["V-SYS-999", "通用虚拟模拟平台", "V-0001", "测试验证科目", "USER-999", "2026-04-07 09:01:01", <Button key="6" type="text">取消</Button>],
               ]}
             />
           </Card>
@@ -163,12 +163,12 @@
             <Table 
               columns={[<input type="checkbox" key="all" />, "系统编号", "系统名称", "科目号", "科目名称", "准入状态", "操作"]}
               data={[
-                [<input type="checkbox" key="c1" />, "XT0006", "虚拟系统006", "60001", "科目601", "未准入", 
+                [<input type="checkbox" key="c1" />, "V-SYS-006", "虚拟测试系统F", "V-60001", "虚拟科目61", "未准入", 
                  <div className="flex space-x-2" key="a1">
                    <Button type="text">准入</Button>
                    <Button type="text" className="!text-gray-500">无需准入</Button>
                  </div>],
-                 [<input type="checkbox" key="c2" />, "99701360002", "内部户对账管理系统", "0001", "测试科目", "无需准入", 
+                 [<input type="checkbox" key="c2" />, "V-SYS-999", "通用虚拟模拟平台", "V-0001", "测试验证科目", "无需准入", 
                  <div className="flex space-x-2" key="a2">
                    <Button type="text">准入</Button>
                    <Button type="text" className="!text-gray-500">无需准入</Button>
@@ -208,22 +208,22 @@
               minWidth="1800px"
               columns={["系统编号", "系统名称", "科目号", "科目名称", "业务余额核对规则", "清算余额核对规则", "业务明细核对规则", "清算明细核对规则", "业务信息类核对规则", "清算信息类核对规则", "操作柜员号", "操作时间", "操作"]}
               data={[
-                ["XT0001", "虚拟系统001", "10001", "科目001", "内部账户+清算日期+金额", "科目+核算机构+币种+金额", "账户+收付款标志位+清算日期+发生额", "科目+核算机构+币种+收付款标志位+...", "账号+机构+科目(八要素)+币种", "账号+机构+科目(八要素)+币种", "99999999999", "2026-04-07 09:01", 
+                ["V-SYS-001", "虚拟测试系统A", "V-10001", "虚拟科目01", "内部账户+清算日期+金额", "科目+核算机构+币种+金额", "账户+收付款标志位+清算日期+发生额", "科目+核算机构+币种+收付款标志位+...", "账号+机构+科目(八要素)+币种", "账号+机构+科目(八要素)+币种", "USER-001", "2026-04-07 09:01", 
                  <div className="flex space-x-2" key="a1">
                    <Button type="text" icon={Edit} onClick={() => setView('maintain')}>编辑</Button>
                    <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
                  </div>],
-                 ["XT0001", "虚拟系统001", "10002", "科目002", "内部账户+清算日期", "科目+核算机构+金额", "账户+收付款标志位+发生额", "科目+核算机构+收付款标志位+清算日期+发生额", "账号+科目(八要素)+币种", "账号+科目(八要素)+币种", "99999999999", "2026-04-07 09:01", 
+                 ["V-SYS-001", "虚拟测试系统A", "V-10002", "虚拟科目02", "内部账户+清算日期", "科目+核算机构+金额", "账户+收付款标志位+发生额", "科目+核算机构+收付款标志位+清算日期+发生额", "账号+科目(八要素)+币种", "账号+科目(八要素)+币种", "USER-001", "2026-04-07 09:01", 
                  <div className="flex space-x-2" key="a2">
                    <Button type="text" icon={Edit}>编辑</Button>
                    <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
                  </div>],
-                 ["XT0001", "虚拟系统001", "10003", "科目003", "内部账户+金额", "科目+核算机构+币种", "账户+收付款标志位+清算日期", "科目+核算机构+币种+收付款标志位+清算日期", "账号+机构+科目(八要素)", "账号+机构+科目(八要素)", "99999999999", "2026-04-07 09:01", 
+                 ["V-SYS-001", "虚拟测试系统A", "V-10003", "虚拟科目03", "内部账户+金额", "科目+核算机构+币种", "账户+收付款标志位+清算日期", "科目+核算机构+币种+收付款标志位+清算日期", "账号+机构+科目(八要素)", "账号+机构+科目(八要素)", "USER-001", "2026-04-07 09:01", 
                  <div className="flex space-x-2" key="a3">
                    <Button type="text" icon={Edit}>编辑</Button>
                    <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
                  </div>],
-                 ["XT0002", "虚拟系统002", "20001", "科目201", "内部账户+清算日期+金额", "科目+核算机构+金额", "账户+收付款标志位+发生额", "科目+核算机构+币种+收付款标志位+发生额", "账号+机构+科目(八要素)", "账号+机构+科目(八要素)+币种", "99999999999", "2026-04-07 10:00", 
+                 ["V-SYS-002", "虚拟测试系统B", "V-20001", "虚拟科目21", "内部账户+清算日期+金额", "科目+核算机构+金额", "账户+收付款标志位+发生额", "科目+核算机构+币种+收付款标志位+发生额", "账号+机构+科目(八要素)", "账号+机构+科目(八要素)+币种", "USER-002", "2026-04-07 10:00", 
                  <div className="flex space-x-2" key="a4">
                    <Button type="text" icon={Edit}>编辑</Button>
                    <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
@@ -241,10 +241,10 @@
           </div>
           <Card>
             <div className="grid grid-cols-4 gap-4 mb-4">
-              <Input label="系统编号" placeholder="默认带入: XT0001" />
-              <Input label="系统名称" placeholder="默认带入: 虚拟系统001" />
-              <Input label="科目号" placeholder="默认带入: 10001" />
-              <Input label="科目名称" placeholder="默认带入: 科目001" />
+              <Input label="系统编号" placeholder="默认带入: V-SYS-001" />
+              <Input label="系统名称" placeholder="默认带入: 虚拟测试系统A" />
+              <Input label="科目号" placeholder="默认带入: V-10001" />
+              <Input label="科目名称" placeholder="默认带入: 虚拟科目01" />
             </div>
             <div className="flex justify-end space-x-2">
               <Button type="primary" icon={Search}>查询</Button>
@@ -323,15 +323,15 @@
               minWidth="1400px"
               columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "日期", "业务余额", "清算余额", "会计余额", "业清不符余额", "清会不符余额", "是否纳入差错", "不符处理进度"]}
               data={[
-                ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "2026-04-07", "20001", "20003", "20002", 
+                ["V-SYS-004", "虚拟测试系统D", "V-40003", "虚拟科目43", "V-ACCT-1001", "虚拟验证账户1", "2026-04-07", "20001", "20003", "20002", 
                  <span key="1" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2 hover:text-red-800" onClick={() => setShowDetailModal(true)}>-2</span>, 
                  <span key="2" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2 hover:text-red-800" onClick={() => setShowDetailModal(true)}>1</span>, 
                  "纳入", "处理中"],
-                 ["XT0002", "虚拟系统002", "20001", "科目201", "0000002", "测试账户2", "2026-04-07", "5000", "5000", "5000", 
+                 ["V-SYS-002", "虚拟测试系统B", "V-20001", "虚拟科目21", "V-ACCT-1002", "虚拟验证账户2", "2026-04-07", "5000", "5000", "5000", 
                  <span key="3" className="text-green-600 font-bold">0</span>, 
                  <span key="4" className="text-green-600 font-bold">0</span>, 
                  "-", "-"],
-                 ["99701360002", "内部户对账管理系统", "0001", "测试科目", "10360000100001", "账户A", "2026-04-07", "1000", "1500", "1000", 
+                 ["V-SYS-999", "通用虚拟模拟平台", "V-0001", "测试验证科目", "V-ACCT-9999", "虚拟验证账户3", "2026-04-07", "1000", "1500", "1000", 
                  <span key="5" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2" onClick={() => setShowDetailModal(true)}>-500</span>, 
                  <span key="6" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2" onClick={() => setShowDetailModal(true)}>500</span>, 
                  "纳入", "未处理"],
@@ -353,15 +353,15 @@
                    <div className="bg-red-50 text-red-800 p-3 rounded text-sm mb-4 border border-red-200 shadow-sm flex items-center justify-between">
                       <div>
                         发现业清余额不符差异： <strong className="text-lg">-2.00</strong> 元。
-                        <span className="ml-4 text-gray-600">系统：虚拟系统004 (XT0004) | 内部户：0000001</span>
+                        <span className="ml-4 text-gray-600">系统：虚拟测试系统D (V-SYS-004) | 内部户：V-ACCT-1001</span>
                       </div>
                    </div>
                    <Table 
                       minWidth="1600px"
                       columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "核算机构", "清算日期", "交易日期", "全局业务跟踪号", "子交易序号", "交易机构号", "币种代码", "不符类型", "交易时间", "差错标志", "备注1"]}
                       data={[
-                        ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "001", "2026-04-07", "2026-04-07", "TRX0019283", "1", "1000", "CNY", "多账", "10:01:23", "是", "缺少对账流水"],
-                        ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "001", "2026-04-07", "2026-04-07", "TRX0019284", "1", "1000", "CNY", "金额不符", "10:05:11", "是", "差额-2.00"],
+                        ["V-SYS-004", "虚拟测试系统D", "V-40003", "虚拟科目43", "V-ACCT-1001", "虚拟验证账户1", "ORG-001", "2026-04-07", "2026-04-07", "FLOW-20260407-001", "1", "1000", "CNY", "多账", "10:01:23", "是", "缺少对账流水"],
+                        ["V-SYS-004", "虚拟测试系统D", "V-40003", "虚拟科目43", "V-ACCT-1001", "虚拟验证账户1", "ORG-001", "2026-04-07", "2026-04-07", "FLOW-20260407-002", "1", "1000", "CNY", "金额不符", "10:05:11", "是", "差额-2.00"],
                       ]}
                    />
                 </div>
@@ -407,13 +407,13 @@
               minWidth="2200px"
               columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "核算机构", "清算日期", "交易日期", "全局业务跟踪号", "子交易序号", "交易机构号", "币种代码", "不符类型", "交易时间", "差错标志", "备注1", "勾兑结果", "操作"]}
               data={[
-                ["XT0001", "虚拟系统001", "10001", "科目001", "10000000001", "内部户一", "001", "2026-04-07", "2026-04-07", "TRX_99201", "1", "1001", "CNY", "多账", "09:12:00", "是", "需排查", "未勾兑", 
+                ["V-SYS-001", "虚拟测试系统A", "V-10001", "虚拟科目01", "V-ACCT-2001", "虚拟内部户A", "ORG-001", "2026-04-07", "2026-04-07", "FLOW-20260407-101", "1", "1001", "CNY", "多账", "09:12:00", "是", "需排查", "未勾兑", 
                  <Button key="1" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
-                ["XT0002", "虚拟系统002", "20001", "科目201", "20000000002", "内部户二", "002", "2026-04-07", "2026-04-07", "TRX_88302", "2", "1002", "CNY", "少账", "11:30:15", "是", "跨日流水", "部分勾兑", 
+                ["V-SYS-002", "虚拟测试系统B", "V-20001", "虚拟科目21", "V-ACCT-2002", "虚拟内部户B", "ORG-002", "2026-04-07", "2026-04-07", "FLOW-20260407-102", "2", "1002", "CNY", "少账", "11:30:15", "是", "跨日流水", "部分勾兑", 
                  <Button key="2" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
-                ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "001", "2026-04-07", "2026-04-07", "TRX_77199", "1", "1000", "CNY", "金额不符", "14:20:00", "是", "差额2.00", "已勾兑", 
+                ["V-SYS-004", "虚拟测试系统D", "V-40003", "虚拟科目43", "V-ACCT-1001", "虚拟验证账户1", "ORG-001", "2026-04-07", "2026-04-07", "FLOW-20260407-103", "1", "1000", "CNY", "金额不符", "14:20:00", "是", "差额2.00", "已勾兑", 
                  <Button key="3" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
-                ["XT0005", "虚拟系统005", "50008", "科目508", "50000000008", "测试账户5", "008", "2026-04-08", "2026-04-08", "TRX_66001", "1", "1005", "USD", "多账", "16:45:22", "否", "-", "未勾兑", 
+                ["V-SYS-005", "虚拟测试系统E", "V-50008", "虚拟科目58", "V-ACCT-2005", "虚拟内部户E", "ORG-008", "2026-04-08", "2026-04-08", "FLOW-20260408-001", "1", "1005", "USD", "多账", "16:45:22", "否", "-", "未勾兑", 
                  <Button key="4" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
               ]}
             />
@@ -428,13 +428,13 @@
           </div>
           
           <Card className="border-t-4 border-t-blue-500">
-            <h3 className="text-md font-semibold text-gray-800 mb-4 border-b pb-2">关联勾兑明细展示 (全局跟踪号: TRX_99201)</h3>
+            <h3 className="text-md font-semibold text-gray-800 mb-4 border-b pb-2">关联勾兑明细展示 (全局跟踪号: FLOW-20260407-101)</h3>
             <Table 
               minWidth="2000px"
               columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "核算机构", "清算日期", "交易日期", "全局业务跟踪号", "子交易序号", "交易机构号", "币种代码", "不符类型", "交易时间", "差错标志", "备注1", "勾兑结果"]}
               data={[
-                ["XT0001", "虚拟系统001", "10001", "科目001", "10000000001", "内部户一", "001", "2026-04-07", "2026-04-07", "TRX_99201", "1", "1001", "CNY", "多账", "09:12:00", "是", "业务系统方", "未勾兑"],
-                ["XT0001", "虚拟系统001", "10001", "科目001", "10000000001", "内部户一", "001", "2026-04-07", "2026-04-07", "TRX_99201", "2", "1001", "CNY", "多账", "09:12:01", "是", "清算系统方", "未勾兑"],
+                ["V-SYS-001", "虚拟测试系统A", "V-10001", "虚拟科目01", "V-ACCT-2001", "虚拟内部户A", "ORG-001", "2026-04-07", "2026-04-07", "FLOW-20260407-101", "1", "1001", "CNY", "多账", "09:12:00", "是", "业务系统方", "未勾兑"],
+                ["V-SYS-001", "虚拟测试系统A", "V-10001", "虚拟科目01", "V-ACCT-2001", "虚拟内部户A", "ORG-001", "2026-04-07", "2026-04-07", "FLOW-20260407-101", "2", "1001", "CNY", "多账", "09:12:01", "是", "清算系统方", "未勾兑"],
               ]}
             />
           </Card>
@@ -487,13 +487,13 @@
             <div className="h-16 bg-white border-b border-gray-200 shadow-sm flex items-center px-8 justify-between z-0">
               <h1 className="text-lg font-semibold text-gray-800 flex items-center">
                 {menus.find(m => m.id === activeMenu)?.label}
-                <span className="ml-3 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-normal border border-blue-100">Prototype V2 (Local)</span>
+                <span className="ml-3 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-normal border border-blue-100">Prototype (Mock Data)</span>
               </h1>
               <div className="flex items-center space-x-4">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-center text-sm shadow-md">
                   柜员
                 </div>
-                <span className="text-sm text-gray-600">ID: 99999999999</span>
+                <span className="text-sm text-gray-600">ID: USER-001</span>
               </div>
             </div>
 
