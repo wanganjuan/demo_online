@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>业清会管理系统原型</title>
+  <!-- 引入 Tailwind CSS 进行页面样式布局 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 Babel 使得浏览器可以直接解析运行 JSX 语法 -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* 简单的自定义滚动条样式 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- 注意这里的 data-type="module"，这是让 Babel 编译后支持原生 ES Module 的 import 语法 -->
+  <script type="text/babel" data-type="module">
+    // 从 esm.sh CDN 直接导入 React 和 ReactDOM
+    import React, { useState } from 'https://esm.sh/react@18';
+    import { createRoot } from 'https://esm.sh/react-dom@18/client';
+    
+    // 从 esm.sh 直接导入所需的 Lucide 图标组件
+    import { 
+      Search, Download, Plus, Settings, CheckSquare, FileText, 
+      ArrowRight, ArrowLeft, X, Edit, Trash2, Home, ChevronRight, 
+      AlertCircle, LayoutList, FileSearch
+    } from 'https://esm.sh/lucide-react@0.292.0';
+
+    // --- 共用组件 ---
+    const Card = ({ children, className = '' }) => (
+      <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 ${className}`}>
+        {children}
+      </div>
+    );
+
+    const Button = ({ children, type = 'primary', icon: Icon, onClick, className = '' }) => {
+      const baseStyle = "flex items-center justify-center px-3 py-1.5 rounded text-sm font-medium transition-colors cursor-pointer";
+      const types = {
+        primary: "bg-blue-600 text-white hover:bg-blue-700",
+        default: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50",
+        danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-red-100",
+        text: "bg-transparent text-blue-600 hover:text-blue-800 px-1 py-0",
+      };
+      return (
+        <button className={`${baseStyle} ${types[type]} ${className}`} onClick={onClick}>
+          {Icon && <Icon className="w-4 h-4 mr-1.5" />}
+          {children}
+        </button>
+      );
+    };
+
+    const Input = ({ label, placeholder }) => (
+      <div className="flex flex-col space-y-1 w-full">
+        {label && <label className="text-xs text-gray-500">{label}</label>}
+        <input 
+          type="text" 
+          placeholder={placeholder} 
+          className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+    );
+
+    const Select = ({ label, options }) => (
+      <div className="flex flex-col space-y-1 w-full">
+        {label && <label className="text-xs text-gray-500">{label}</label>}
+        <select className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white">
+          {options.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
+        </select>
+      </div>
+    );
+
+    const Table = ({ columns, data, minWidth = '100%' }) => (
+      <div className="overflow-x-auto w-full border border-gray-200 rounded-md">
+        <table className="w-full text-left border-collapse" style={{ minWidth }}>
+          <thead>
+            <tr className="bg-gray-100 border-b border-gray-200 text-sm">
+              {columns.map((col, idx) => (
+                <th key={idx} className="p-3 font-medium text-gray-700 whitespace-nowrap">{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white">
+            {data.map((row, rowIdx) => (
+              <tr key={rowIdx} className="border-b border-gray-100 hover:bg-blue-50/50 text-sm transition-colors">
+                {row.map((cell, cellIdx) => (
+                  <td key={cellIdx} className="p-3 text-gray-700 whitespace-nowrap">{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+
+    // --- 页面: 1. 核对内部户准入 ---
+    const AdmittanceMenu = () => {
+      const [view, setView] = useState('main');
+
+      const MainView = () => (
+        <div className="space-y-4 animate-in fade-in">
+          <Card>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <Input label="系统编号" placeholder="请输入" />
+              <Input label="系统名称" placeholder="请输入" />
+              <Input label="科目号" placeholder="请输入" />
+              <Input label="科目名称" placeholder="请输入" />
+              <Input label="维护人员" placeholder="请输入" />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="default" icon={Download}>导出</Button>
+              <Button type="primary" icon={Search}>查询</Button>
+              <Button type="primary" icon={Plus} onClick={() => setView('add')}>新增</Button>
+            </div>
+          </Card>
+          
+          <Card>
+            <div className="mb-3 text-sm text-gray-500 font-medium">已准入列表 (仅显示确定准入之后的数据)</div>
+            <Table 
+              columns={["系统编号", "系统名称", "科目号", "科目名称", "操作柜员号", "操作时间", "操作"]}
+              data={[
+                ["XT0001", "虚拟系统001", "10001|10002|10003", "科目001|科目002|科目003", "99999999999", "2026-04-07 09:01:01", <Button key="1" type="text" onClick={() => alert("状态变更为预准入，请到新增页面查看")}>取消</Button>],
+                ["XT0002", "虚拟系统002", "20001|20004", "科目201|科目204", "99999999999", "2026-04-05 13:01:21", <Button key="2" type="text">取消</Button>],
+                ["XT0003", "虚拟系统003", "30006", "科目306", "99999999999", "2026-04-07 10:24:08", <Button key="3" type="text">取消</Button>],
+                ["XT0004", "虚拟系统004", "40003", "科目403", "99999999999", "2026-04-08 12:46:08", <Button key="4" type="text">取消</Button>],
+                ["XT0005", "虚拟系统005", "50008", "科目508", "99999999999", "2026-04-09 08:30:00", <Button key="5" type="text">取消</Button>],
+                ["99701360002", "内部户对账管理系统", "0001", "测试科目", "20220101111", "2026-04-07 09:01:01", <Button key="6" type="text">取消</Button>],
+              ]}
+            />
+          </Card>
+        </div>
+      );
+
+      const AddView = () => (
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+          <div className="flex items-center text-sm text-gray-500 mb-2 cursor-pointer hover:text-blue-600" onClick={() => setView('main')}>
+            <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> 返回主页面
+          </div>
+          <Card>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <Input label="系统编号" placeholder="请输入" />
+              <Input label="系统名称" placeholder="请输入" />
+              <Select label="准入状态" options={["全部", "未准入", "无需准入"]} />
+              <Input label="科目号" placeholder="请输入" />
+              <Input label="科目名称" placeholder="请输入" />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="default" icon={Search}>查询</Button>
+              <Button type="primary" icon={CheckSquare}>批量准入</Button>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="mb-3 text-sm flex items-center justify-between">
+              <span className="text-gray-500 font-medium">待准入列表 (初始数据从清算接入)</span>
+              <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs font-medium border border-blue-100">有 2 条待办提醒需要处理</span>
+            </div>
+            <Table 
+              columns={[<input type="checkbox" key="all" />, "系统编号", "系统名称", "科目号", "科目名称", "准入状态", "操作"]}
+              data={[
+                [<input type="checkbox" key="c1" />, "XT0006", "虚拟系统006", "60001", "科目601", "未准入", 
+                 <div className="flex space-x-2" key="a1">
+                   <Button type="text">准入</Button>
+                   <Button type="text" className="!text-gray-500">无需准入</Button>
+                 </div>],
+                 [<input type="checkbox" key="c2" />, "99701360002", "内部户对账管理系统", "0001", "测试科目", "无需准入", 
+                 <div className="flex space-x-2" key="a2">
+                   <Button type="text">准入</Button>
+                   <Button type="text" className="!text-gray-500">无需准入</Button>
+                 </div>],
+              ]}
+            />
+          </Card>
+        </div>
+      );
+
+      return view === 'main' ? <MainView /> : <AddView />;
+    };
+
+    // --- 页面: 2. 规则维护 ---
+    const RulesMenu = () => {
+      const [view, setView] = useState('main');
+
+      const MainView = () => (
+        <div className="space-y-4 animate-in fade-in">
+          <Card>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <Input label="系统编号" placeholder="请输入" />
+              <Input label="系统名称" placeholder="请输入" />
+              <Input label="科目号" placeholder="请输入" />
+              <Input label="科目名称" placeholder="请输入" />
+              <Input label="维护人员" placeholder="请输入" />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="default" icon={Download}>导出</Button>
+              <Button type="primary" icon={Search}>查询</Button>
+              <Button type="primary" icon={Settings} onClick={() => setView('maintain')}>维护</Button>
+            </div>
+          </Card>
+          
+          <Card>
+            <Table 
+              minWidth="1800px"
+              columns={["系统编号", "系统名称", "科目号", "科目名称", "业务余额核对规则", "清算余额核对规则", "业务明细核对规则", "清算明细核对规则", "业务信息类核对规则", "清算信息类核对规则", "操作柜员号", "操作时间", "操作"]}
+              data={[
+                ["XT0001", "虚拟系统001", "10001", "科目001", "内部账户+清算日期+金额", "科目+核算机构+币种+金额", "账户+收付款标志位+清算日期+发生额", "科目+核算机构+币种+收付款标志位+...", "账号+机构+科目(八要素)+币种", "账号+机构+科目(八要素)+币种", "99999999999", "2026-04-07 09:01", 
+                 <div className="flex space-x-2" key="a1">
+                   <Button type="text" icon={Edit} onClick={() => setView('maintain')}>编辑</Button>
+                   <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
+                 </div>],
+                 ["XT0001", "虚拟系统001", "10002", "科目002", "内部账户+清算日期", "科目+核算机构+金额", "账户+收付款标志位+发生额", "科目+核算机构+收付款标志位+清算日期+发生额", "账号+科目(八要素)+币种", "账号+科目(八要素)+币种", "99999999999", "2026-04-07 09:01", 
+                 <div className="flex space-x-2" key="a2">
+                   <Button type="text" icon={Edit}>编辑</Button>
+                   <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
+                 </div>],
+                 ["XT0001", "虚拟系统001", "10003", "科目003", "内部账户+金额", "科目+核算机构+币种", "账户+收付款标志位+清算日期", "科目+核算机构+币种+收付款标志位+清算日期", "账号+机构+科目(八要素)", "账号+机构+科目(八要素)", "99999999999", "2026-04-07 09:01", 
+                 <div className="flex space-x-2" key="a3">
+                   <Button type="text" icon={Edit}>编辑</Button>
+                   <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
+                 </div>],
+                 ["XT0002", "虚拟系统002", "20001", "科目201", "内部账户+清算日期+金额", "科目+核算机构+金额", "账户+收付款标志位+发生额", "科目+核算机构+币种+收付款标志位+发生额", "账号+机构+科目(八要素)", "账号+机构+科目(八要素)+币种", "99999999999", "2026-04-07 10:00", 
+                 <div className="flex space-x-2" key="a4">
+                   <Button type="text" icon={Edit}>编辑</Button>
+                   <Button type="text" icon={Trash2} className="!text-red-500">删除</Button>
+                 </div>],
+              ]}
+            />
+          </Card>
+        </div>
+      );
+
+      const MaintainView = () => (
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+          <div className="flex items-center text-sm text-gray-500 mb-2 cursor-pointer hover:text-blue-600" onClick={() => setView('main')}>
+            <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> 返回主页面
+          </div>
+          <Card>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <Input label="系统编号" placeholder="默认带入: XT0001" />
+              <Input label="系统名称" placeholder="默认带入: 虚拟系统001" />
+              <Input label="科目号" placeholder="默认带入: 10001" />
+              <Input label="科目名称" placeholder="默认带入: 科目001" />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="primary" icon={Search}>查询</Button>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="mb-4">
+              <Select label="选择需要维护的规则类型" options={["清算明细核对规则", "业务余额核对规则", "清算余额核对规则", "业务明细核对规则", "业务信息类核对规则", "清算信息类核对规则"]} />
+            </div>
+            
+            {/* 穿梭框 UI */}
+            <div className="flex items-stretch justify-center space-x-4 h-64">
+              <div className="flex-1 border border-gray-200 rounded-md flex flex-col overflow-hidden">
+                <div className="bg-gray-50 p-2 text-sm font-medium border-b text-center text-gray-700">可选择规则池子</div>
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {['内部账户', '记账时间', '交易机构号', '子交易序号', '全局业务跟踪号'].map((item, idx) => (
+                    <div key={idx} className="p-2 hover:bg-blue-50 text-sm border border-transparent hover:border-blue-200 rounded cursor-pointer">{item}</div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <Button type="primary" className="!px-2 !py-1"><ArrowRight className="w-4 h-4" /></Button>
+                <Button type="default" className="!px-2 !py-1"><ArrowLeft className="w-4 h-4" /></Button>
+              </div>
+
+              <div className="flex-1 border border-gray-200 rounded-md flex flex-col overflow-hidden">
+                <div className="bg-blue-50 p-2 text-sm font-medium border-b text-center text-blue-800">已选择规则池子</div>
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {['科目', '核算机构', '币种', '收付款标志位', '清算日期', '发生额'].map((item, idx) => (
+                    <div key={idx} className="p-2 bg-white shadow-sm text-sm border border-blue-200 rounded flex justify-between items-center">
+                      {item}
+                      <X className="w-4 h-4 text-gray-400 hover:text-red-500 cursor-pointer" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 flex justify-center">
+              <Button type="primary" className="px-8">保存维护规则</Button>
+            </div>
+          </Card>
+        </div>
+      );
+
+      return view === 'main' ? <MainView /> : <MaintainView />;
+    };
+
+    // --- 页面: 3. 核对结果 ---
+    const ResultsMenu = () => {
+      const [showDetailModal, setShowDetailModal] = useState(false);
+
+      return (
+        <div className="space-y-4 animate-in fade-in relative">
+          <Card>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <Input label="系统编号" placeholder="请输入" />
+              <Input label="系统名称" placeholder="请输入" />
+              <Input label="科目号" placeholder="请输入" />
+              <Input label="科目名称" placeholder="请输入" />
+              <Select label="业清余额不符状态" options={["全部", "相符", "不符"]} />
+              <Select label="业清明细不符状态" options={["全部", "相符", "不符"]} />
+              <Select label="清会相符状态" options={["全部", "相符", "不符"]} />
+              <Select label="是否纳入对账" options={["全部", "是", "否"]} />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="default" icon={Download}>导出</Button>
+              <Button type="primary" icon={Search}>查询</Button>
+            </div>
+          </Card>
+          
+          <Card>
+            <Table 
+              minWidth="1400px"
+              columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "日期", "业务余额", "清算余额", "会计余额", "业清不符余额", "清会不符余额", "是否纳入差错", "不符处理进度"]}
+              data={[
+                ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "2026-04-07", "20001", "20003", "20002", 
+                 <span key="1" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2 hover:text-red-800" onClick={() => setShowDetailModal(true)}>-2</span>, 
+                 <span key="2" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2 hover:text-red-800" onClick={() => setShowDetailModal(true)}>1</span>, 
+                 "纳入", "处理中"],
+                 ["XT0002", "虚拟系统002", "20001", "科目201", "0000002", "测试账户2", "2026-04-07", "5000", "5000", "5000", 
+                 <span key="3" className="text-green-600 font-bold">0</span>, 
+                 <span key="4" className="text-green-600 font-bold">0</span>, 
+                 "-", "-"],
+                 ["99701360002", "内部户对账管理系统", "0001", "测试科目", "10360000100001", "账户A", "2026-04-07", "1000", "1500", "1000", 
+                 <span key="5" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2" onClick={() => setShowDetailModal(true)}>-500</span>, 
+                 <span key="6" className="text-red-600 font-bold cursor-pointer underline decoration-red-300 underline-offset-2" onClick={() => setShowDetailModal(true)}>500</span>, 
+                 "纳入", "未处理"],
+              ]}
+            />
+          </Card>
+
+          {/* 业清不符明细 弹窗 */}
+          {showDetailModal && (
+            <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg shadow-2xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+                  <h3 className="font-bold text-lg flex items-center text-gray-800">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-2" /> 业清不符明细页面
+                  </h3>
+                  <X className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-800 bg-gray-200 rounded-full p-0.5" onClick={() => setShowDetailModal(false)} />
+                </div>
+                <div className="p-4 flex-1 overflow-auto">
+                   <div className="bg-red-50 text-red-800 p-3 rounded text-sm mb-4 border border-red-200 shadow-sm flex items-center justify-between">
+                      <div>
+                        发现业清余额不符差异： <strong className="text-lg">-2.00</strong> 元。
+                        <span className="ml-4 text-gray-600">系统：虚拟系统004 (XT0004) | 内部户：0000001</span>
+                      </div>
+                   </div>
+                   <Table 
+                      minWidth="1600px"
+                      columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "核算机构", "清算日期", "交易日期", "全局业务跟踪号", "子交易序号", "交易机构号", "币种代码", "不符类型", "交易时间", "差错标志", "备注1"]}
+                      data={[
+                        ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "001", "2026-04-07", "2026-04-07", "TRX0019283", "1", "1000", "CNY", "多账", "10:01:23", "是", "缺少对账流水"],
+                        ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "001", "2026-04-07", "2026-04-07", "TRX0019284", "1", "1000", "CNY", "金额不符", "10:05:11", "是", "差额-2.00"],
+                      ]}
+                   />
+                </div>
+                <div className="p-4 border-t bg-gray-50 flex justify-end space-x-3">
+                  <Button type="default" onClick={() => setShowDetailModal(false)}>关闭返回</Button>
+                  <Button type="primary">导出明细</Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // --- 页面: 4. 业清不符勾兑明细 ---
+    const MismatchDetailsMenu = () => {
+      const [view, setView] = useState('main'); 
+
+      const MainView = () => (
+        <div className="space-y-4 animate-in fade-in">
+          <Card>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <Input label="系统编号" placeholder="请输入" />
+              <Input label="系统名称" placeholder="请输入" />
+              <Input label="科目号" placeholder="请输入" />
+              <Input label="科目名称" placeholder="请输入" />
+              <Input label="全局业务跟踪号" placeholder="请输入" />
+              <Select label="是否纳入对账" options={["全部", "是", "否"]} />
+              <Input label="交易日期" placeholder="YYYY-MM-DD" />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="default" icon={Download}>导出</Button>
+              <Button type="primary" icon={Search}>查询</Button>
+            </div>
+          </Card>
+          
+          <Card>
+            <div className="mb-3 text-sm text-gray-600 font-medium flex items-center">
+              <FileSearch className="w-4 h-4 mr-2 text-blue-600" />
+              业清不符勾兑明细列表 (19个字段)
+            </div>
+            <Table 
+              minWidth="2200px"
+              columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "核算机构", "清算日期", "交易日期", "全局业务跟踪号", "子交易序号", "交易机构号", "币种代码", "不符类型", "交易时间", "差错标志", "备注1", "勾兑结果", "操作"]}
+              data={[
+                ["XT0001", "虚拟系统001", "10001", "科目001", "10000000001", "内部户一", "001", "2026-04-07", "2026-04-07", "TRX_99201", "1", "1001", "CNY", "多账", "09:12:00", "是", "需排查", "未勾兑", 
+                 <Button key="1" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
+                ["XT0002", "虚拟系统002", "20001", "科目201", "20000000002", "内部户二", "002", "2026-04-07", "2026-04-07", "TRX_88302", "2", "1002", "CNY", "少账", "11:30:15", "是", "跨日流水", "部分勾兑", 
+                 <Button key="2" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
+                ["XT0004", "虚拟系统004", "40003", "科目403", "0000001", "测试账户1", "001", "2026-04-07", "2026-04-07", "TRX_77199", "1", "1000", "CNY", "金额不符", "14:20:00", "是", "差额2.00", "已勾兑", 
+                 <Button key="3" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
+                ["XT0005", "虚拟系统005", "50008", "科目508", "50000000008", "测试账户5", "008", "2026-04-08", "2026-04-08", "TRX_66001", "1", "1005", "USD", "多账", "16:45:22", "否", "-", "未勾兑", 
+                 <Button key="4" type="text" icon={LayoutList} onClick={() => setView('subDetail')}>查看勾兑明细</Button>],
+              ]}
+            />
+          </Card>
+        </div>
+      );
+
+      const SubDetailView = () => (
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+          <div className="flex items-center text-sm text-gray-500 mb-2 cursor-pointer hover:text-blue-600" onClick={() => setView('main')}>
+            <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> 返回上一级 (勾兑明细列表)
+          </div>
+          
+          <Card className="border-t-4 border-t-blue-500">
+            <h3 className="text-md font-semibold text-gray-800 mb-4 border-b pb-2">关联勾兑明细展示 (全局跟踪号: TRX_99201)</h3>
+            <Table 
+              minWidth="2000px"
+              columns={["系统编号", "系统名称", "科目号", "科目名称", "内部户账号", "内部户账户名称", "核算机构", "清算日期", "交易日期", "全局业务跟踪号", "子交易序号", "交易机构号", "币种代码", "不符类型", "交易时间", "差错标志", "备注1", "勾兑结果"]}
+              data={[
+                ["XT0001", "虚拟系统001", "10001", "科目001", "10000000001", "内部户一", "001", "2026-04-07", "2026-04-07", "TRX_99201", "1", "1001", "CNY", "多账", "09:12:00", "是", "业务系统方", "未勾兑"],
+                ["XT0001", "虚拟系统001", "10001", "科目001", "10000000001", "内部户一", "001", "2026-04-07", "2026-04-07", "TRX_99201", "2", "1001", "CNY", "多账", "09:12:01", "是", "清算系统方", "未勾兑"],
+              ]}
+            />
+          </Card>
+        </div>
+      );
+
+      return view === 'main' ? <MainView /> : <SubDetailView />;
+    };
+
+    // --- 主应用架构 ---
+    const App = () => {
+      const [activeMenu, setActiveMenu] = useState('mismatch'); 
+
+      const menus = [
+        { id: 'admittance', label: '核对内部户准入', icon: CheckSquare },
+        { id: 'rules', label: '规则维护', icon: Settings },
+        { id: 'results', label: '核对结果', icon: FileText },
+        { id: 'mismatch', label: '业清不符勾兑明细', icon: FileSearch },
+      ];
+
+      return (
+        <div className="min-h-screen bg-gray-50 flex font-sans">
+          {/* 侧边栏 */}
+          <div className="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-10">
+            <div className="h-16 flex items-center px-6 text-white font-bold text-lg tracking-wide border-b border-slate-800 bg-slate-950">
+              <Home className="w-5 h-5 mr-3 text-blue-500" />
+              业清会管理系统
+            </div>
+            <div className="flex-1 py-6 space-y-1 px-3">
+              {menus.map(menu => (
+                <div 
+                  key={menu.id}
+                  onClick={() => setActiveMenu(menu.id)}
+                  className={`flex items-center px-3 py-3 rounded-md cursor-pointer transition-colors ${
+                    activeMenu === menu.id 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <menu.icon className="w-5 h-5 mr-3" />
+                  <span className="text-sm font-medium">{menu.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 主体内容区 */}
+          <div className="flex-1 flex flex-col h-screen overflow-hidden">
+            {/* 顶部 Header */}
+            <div className="h-16 bg-white border-b border-gray-200 shadow-sm flex items-center px-8 justify-between z-0">
+              <h1 className="text-lg font-semibold text-gray-800 flex items-center">
+                {menus.find(m => m.id === activeMenu)?.label}
+                <span className="ml-3 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-normal border border-blue-100">Prototype V2 (Local)</span>
+              </h1>
+              <div className="flex items-center space-x-4">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-center text-sm shadow-md">
+                  柜员
+                </div>
+                <span className="text-sm text-gray-600">ID: 99999999999</span>
+              </div>
+            </div>
+
+            {/* 页面路由内容 */}
+            <div className="flex-1 overflow-auto p-6 bg-slate-50">
+              {activeMenu === 'admittance' && <AdmittanceMenu />}
+              {activeMenu === 'rules' && <RulesMenu />}
+              {activeMenu === 'results' && <ResultsMenu />}
+              {activeMenu === 'mismatch' && <MismatchDetailsMenu />}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 渲染应用到根节点
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
